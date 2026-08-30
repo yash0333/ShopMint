@@ -4,5 +4,6 @@ public enum ProductCategory {
     ELECTRONICS,
     CLOTHING,
     BOOKS,
-    GROCERY
+    GROCERY,
+    ACCESSORIES
 }

@@ -27,6 +27,7 @@ public class OrderService {
     private final CartService cartService;
 
     private int orderId = 1;
+    private boolean festivalSaleActive = true;
 
     public OrderService(CustomerService customerService,
                         CartService cartService) {
@@ -92,30 +93,39 @@ public class OrderService {
         // Apply discount
         double discountAmount = 0;
 
-        // Percentage discount
-        if (totalAmount >= 1000) {
+        // 1. Order value discount - 10% for orders >= ₹5,000
+        if (totalAmount >= 5000) {
             discountAmount += totalAmount * 0.10;
         }
 
-        // Flat discount
-        if (totalAmount >= 5000) {
+        // 2. Large order discount - ₹500 for orders >= ₹10,000
+        if (totalAmount >= 10000) {
             discountAmount += 500;
         }
 
-        // Coupon discount
+        // 3. Coupon discount - ₹1,000 for valid coupon
         if ("WELCOME1000".equals(couponCode)) {
             discountAmount += 1000;
         }
 
-        // Maximum discount
-        if (discountAmount > 2000) {
-            discountAmount = 2000;
+        // 4. New customer discount - ₹250 on first order
+        if (customer.isNewCustomer()) {
+            discountAmount += 250;
+        }
+
+        // 5. Festival discount - 15% for orders >= ₹20,000
+        if (festivalSaleActive && totalAmount >= 20000) {
+            discountAmount += totalAmount * 0.15;
+        }
+
+        // 6. Maximum discount - cap total discount at ₹5,000
+        if (discountAmount > 5000) {
+            discountAmount = 5000;
         }
 
         order.setDiscountAmount(discountAmount);
 
-        double amountAfterDiscount =
-                totalAmount - discountAmount;
+        double amountAfterDiscount = totalAmount - discountAmount;
 
         // Calculate shipping
         double shippingAmount = 0;
@@ -131,6 +141,10 @@ public class OrderService {
 
         double finalAmount =
                 amountAfterDiscount + shippingAmount;
+
+        if (finalAmount < 0) {
+            throw new IllegalArgumentException("Order amount cannot be negative");
+        }
 
         order.setFinalAmount(finalAmount);
 

@@ -163,76 +163,74 @@
             class="place-order-button" (click)="placeOrder()"> Place Order </button>
         </div>
 
+        @if (order()) {
+
+        <section class="confirmation">
+
+          <div class="success-icon">✓</div>
+
+          <h2>Order Confirmed!</h2>
+
+          <p>
+            Your order #{{ order()?.id }}
+            has been successfully placed.
+          </p>
+
+          <h3>Payment</h3>
+
+          <p>
+            ✓ {{ order()?.paymentResult?.message }}
+            <br>
+            Method: {{ order()?.paymentResult?.paymentType }}
+          </p>
+
+          <h3>Order Summary</h3>
+
+          <div class="order-summary">
+
+            <div>Subtotal</div>
+            <div class="amount">
+              ₹{{ order()?.totalAmount }}
+            </div>
+
+            <div>Discount</div>
+            <div class="amount">
+              - ₹{{ order()?.discountAmount }}
+            </div>
+
+            <div>Shipping</div>
+            <div class="amount">
+              ₹{{ order()?.shippingAmount }}
+            </div>
+
+            <div class="total">
+              <strong>Total Amount</strong>
+            </div>
+
+            <div class="amount total">
+              <strong>₹{{ order()?.finalAmount }}</strong>
+            </div>
+
+          </div>
+
+          <h3>Notifications</h3>
+
+          @for (notification of order()?.notifications; track notification.type) {
+
+          <div class="notification">
+            ✓ {{ notification.message }}
+            <br>
+            {{ notification.type }} → {{ notification.recipient }}
+          </div>
+
+          }
+        </section>
+
+        }
+
       </div>
 
     </section>
-
-
-    @if (order()) {
-
-  <section class="confirmation">
-
-<div class="success-icon">✓</div>
-
-<h2>Order Confirmed!</h2>
-
-<p>
-  Your order #{{ order()?.id }}
-  has been successfully placed.
-</p>
-
-<h3>Payment</h3>
-
-<p>
-  ✓ {{ order()?.paymentResult?.message }}
-  <br>
-  Method: {{ order()?.paymentResult?.paymentType }}
-</p>
-
-<h3>Order Summary</h3>
-
-<div class="order-summary">
-
-  <div>Subtotal</div>
-  <div class="amount">
-    ₹{{ order()?.totalAmount }}
-  </div>
-
-  <div>Discount</div>
-  <div class="amount">
-    - ₹{{ order()?.discountAmount }}
-  </div>
-
-  <div>Shipping</div>
-  <div class="amount">
-    ₹{{ order()?.shippingAmount }}
-  </div>
-
-  <div class="total">
-    <strong>Total Amount</strong>
-  </div>
-
-  <div class="amount total">
-    <strong>₹{{ order()?.finalAmount }}</strong>
-  </div>
-
-</div>
-
-<h3>Notifications</h3>
-
-@for (notification of order()?.notifications; track notification.type) {
-
-  <div class="notification">
-    ✓ {{ notification.message }}
-    <br>
-    {{ notification.type }} → {{ notification.recipient }}
-  </div>
-
-}
-  </section>
-
-}
-
 
   </main>
 

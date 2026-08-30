@@ -16,6 +16,11 @@ public class Customer {
         this.address = address;
     }
 
+    public boolean isNewCustomer() {
+        // Simulated for the baseline implementation
+        return true;
+    }
+
     public int getId() {
         return id;
     }
