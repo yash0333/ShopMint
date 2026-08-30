@@ -141,14 +141,7 @@ Each product contains information such as:
 * Price
 * Available quantity
 
-The Angular UI displays the available products.
-
-Example products include:
-
-* Laptop
-* Wireless Mouse
-* Mechanical Keyboard
-* Java Book
+The catalog contains sample products across supported categories.
 
 ---
 
@@ -171,37 +164,20 @@ The cart is currently maintained in memory.
 
 The checkout flow currently supports:
 
-### Payment
+* Payment method selection
+* Optional coupon code
+* Automatic discount rule evaluation
+* Shipping method selection
+* Order placement
+* Order confirmation
 
-* UPI
-* Credit Card
-* Debit Card
-* Cash on Delivery
+Payment, discount, shipping, and notification processing are currently simulated and do not connect to external services.
 
-### Discount
+Detailed requirements:
 
-Discounts are evaluated automatically based on the order and applicable rules.
-
-Currently supported discount rules include:
-
-* 10% percentage discount for eligible orders
-* ₹500 flat discount for eligible orders
-* ₹1,000 coupon discount for a valid coupon
-* Maximum discount limit of ₹2,000
-
-Customers can optionally enter a coupon code during checkout.
-
-### Shipping
-
-* Standard
-* Express
-
-Payment, discount, and shipping behavior are currently simulated and do not connect to real external services.
-
-Notifications are not selected by the customer. Once an order is confirmed, ShopMint currently generates confirmation information for both:
-
-* Email
-* SMS
+* [Payment](docs/payment.md)
+* [Discount](docs/discount.md)
+* [Notification](docs/notification.md)
 
 ---
 
@@ -229,21 +205,9 @@ Place Order
 Order Confirmation
 ```
 
-During order placement, the application:
+During order placement, ShopMint validates the customer and cart, creates the order, calculates the total, applies discounts and shipping, processes payment, updates inventory, stores the order, clears the cart, and generates notification information.
 
-1. Validates the customer.
-2. Validates the shopping cart.
-3. Creates the order.
-4. Calculates the order total.
-5. Evaluates and applies the applicable discount rules.
-6. Calculates shipping.
-7. Processes the selected payment.
-8. Updates product inventory.
-9. Confirms and stores the order.
-10. Clears the cart.
-11. Generates Email and SMS notification information.
-
-The order response contains payment information, discount and shipping details, and generated notification information so that the Angular application can display the complete order confirmation.
+The order response contains the information required by the Angular application to display the order confirmation.
 
 ---
 
@@ -347,20 +311,22 @@ These problems will become the motivation for introducing design patterns.
 
 ---
 
-# 9. Planned Design Patterns
+## 9. Design Pattern Roadmap
 
-Depending on the problems identified in the existing implementation, the following patterns may be introduced:
+The following patterns are being explored based on design problems identified in the application:
 
-* Factory Method
-* Strategy
-* Observer
-* State
-* Builder
-* Decorator
-* Chain of Responsibility
-* Adapter
-* Facade
-* Command
+| Pattern                 | Area                      | Status      |
+| ----------------------- | ------------------------- | ----------- |
+| Strategy                | Payment processing        | Implemented |
+| Factory Method          | Payment strategy creation | Implemented |
+| Observer                | Notifications             | Implemented |
+| Chain of Responsibility | Discount processing       | Next        |
+| State                   | Order lifecycle           | Planned     |
+| Builder                 | Object creation           | Planned     |
+| Decorator               | Promotions                | Planned     |
+| Adapter                 | External integrations     | Planned     |
+| Facade                  | Checkout                  | Planned     |
+| Command                 | Cart operations           | Planned     |
 
 A pattern will only be introduced when there is a genuine design problem that justifies its use.
 
@@ -372,108 +338,44 @@ The goal is to understand:
 
 # 10. Current Refactoring Status
 
-The initial implementation is being maintained as a baseline for the design-pattern refactoring journey.
+The initial implementation is maintained as the baseline for the design-pattern learning journey.
 
-### Baseline
+Current progress:
 
-The baseline implementation contains the complete basic e-commerce workflow using intentionally straightforward code.
+* Strategy — Payment processing — Baseline ready for refactoring
+* Factory Method — Payment strategy creation — Baseline ready for refactoring
+* Observer — Notifications — Baseline ready for refactoring
+* Chain of Responsibility — Discount processing — Baseline ready for refactoring
 
-The order service currently contains responsibilities for:
+The current `OrderService` intentionally contains multiple responsibilities and conditional logic. These areas will be refactored incrementally as part of the learning journey.
 
-* Order creation
-* Order item creation
-* Total calculation
-* Discount calculation
-* Shipping calculation
-* Payment processing
-* Inventory updates
-* Order persistence
-* Cart clearing
-* Notification creation
-
-This makes `OrderService` a good candidate for incremental refactoring.
-
-### Payment Refactoring
-
-Payment processing is planned as one of the first areas for refactoring because the baseline implementation contains conditional logic for different payment types.
-
-The refactoring journey will demonstrate how appropriate design patterns can reduce coupling and improve extensibility.
-
-### Discount Refactoring
-
-The baseline implementation evaluates multiple discount rules directly inside the order placement workflow.
-
-Currently, the discount calculation includes percentage discounts, flat discounts, coupon discounts, and a maximum discount limit.
-
-As additional discount rules are introduced, this approach can lead to growing conditional logic and make the discount calculation difficult to extend and maintain.
-
-The discount calculation will be used as a starting point for exploring the **Chain of Responsibility Pattern**.
-
-The refactoring will separate individual discount rules into independent handlers that can evaluate the order sequentially. This will allow new discount rules to be added without continuously increasing the complexity of `OrderService`.
-
-The goal is to demonstrate how Chain of Responsibility can be useful when multiple rules need to be evaluated in a defined sequence.
-
-### Notification Refactoring
-
-The current baseline generates notification information for both Email and SMS directly inside the order placement workflow.
-
-The notification behavior is intentionally kept simple at this stage.
-
-This provides the starting point for exploring the **Observer Pattern**.
-
-The goal of the notification refactoring will be to decouple the order workflow from individual notification mechanisms and allow additional observers to be added without continuously modifying `OrderService`.
+Detailed business requirements are maintained in the [`docs`](docs/) directory.
 
 ---
 
-# 11. Before and After Philosophy
+# 11. Future Scope
 
-ShopMint will maintain the initial implementation as the baseline for the design-pattern journey.
+Additional capabilities may be introduced when they help demonstrate new design problems or patterns.
 
-For each pattern:
+Possible future enhancements include:
 
-```text
-BEFORE
-Simple / Poor Implementation
-        ↓
-Identify Problem
-        ↓
-Explain Design Principle
-        ↓
-Introduce Pattern
-        ↓
-AFTER
-Improved Implementation
-```
-
-This makes it possible to clearly demonstrate the practical value of each design pattern instead of presenting patterns only as theoretical concepts.
-
----
-
-# 12. Future Scope
-
-The following capabilities may be added later if they help demonstrate additional design problems or patterns:
-
-* Product search
-* Product filtering
+* Product search and filtering
 * Cart quantity updates
 * Customer order history
 * Order cancellation
 * Order status management
 * Database persistence
 * Automated tests
-* External payment integration
-* External notification integration
+* External payment integrations
+* External notification integrations
 * Authentication and authorization
-* Additional payment methods
-* Additional shipping methods
-* Additional discount types
-* Additional notification channels
+* Additional business rules and integrations
 
-These features will only be added when they contribute to the learning objectives of the project.
+Features will only be added when they contribute to the learning objectives of the project.
 
 ---
 
-# 13. Project Philosophy
+# 12. Project Philosophy
 
 ShopMint is intentionally not designed to be a production-ready e-commerce platform.
 
