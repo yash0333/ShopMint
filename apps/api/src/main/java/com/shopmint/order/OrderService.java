@@ -36,7 +36,7 @@ public class OrderService {
 
     public Order placeOrder(int customerId,
                             PaymentType paymentType,
-                            DiscountType discountType,
+                            String couponCode,
                             ShippingType shippingType) {
 
         // Validate customer
@@ -92,14 +92,24 @@ public class OrderService {
         // Apply discount
         double discountAmount = 0;
 
-        if (discountType == DiscountType.PERCENTAGE) {
-            discountAmount = totalAmount * 0.10;
+        // Percentage discount
+        if (totalAmount >= 1000) {
+            discountAmount += totalAmount * 0.10;
+        }
 
-        } else if (discountType == DiscountType.FLAT) {
-            discountAmount = 500;
+        // Flat discount
+        if (totalAmount >= 5000) {
+            discountAmount += 500;
+        }
 
-        } else if (discountType == DiscountType.COUPON) {
-            discountAmount = 1000;
+        // Coupon discount
+        if ("WELCOME1000".equals(couponCode)) {
+            discountAmount += 1000;
+        }
+
+        // Maximum discount
+        if (discountAmount > 2000) {
+            discountAmount = 2000;
         }
 
         order.setDiscountAmount(discountAmount);

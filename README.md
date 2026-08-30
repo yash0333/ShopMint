@@ -169,7 +169,7 @@ The cart is currently maintained in memory.
 
 ## 5.4 Checkout
 
-The checkout flow currently supports selecting:
+The checkout flow currently supports:
 
 ### Payment
 
@@ -180,10 +180,16 @@ The checkout flow currently supports selecting:
 
 ### Discount
 
-* No Discount
-* Percentage Discount
-* Flat Discount
-* Coupon
+Discounts are evaluated automatically based on the order and applicable rules.
+
+Currently supported discount rules include:
+
+* 10% percentage discount for eligible orders
+* ₹500 flat discount for eligible orders
+* ₹1,000 coupon discount for a valid coupon
+* Maximum discount limit of ₹2,000
+
+Customers can optionally enter a coupon code during checkout.
 
 ### Shipping
 
@@ -212,7 +218,9 @@ Checkout
   ↓
 Payment Selection
   ↓
-Discount Selection
+Coupon (Optional)
+  ↓
+Discount Rules Evaluation
   ↓
 Shipping Selection
   ↓
@@ -227,7 +235,7 @@ During order placement, the application:
 2. Validates the shopping cart.
 3. Creates the order.
 4. Calculates the order total.
-5. Applies the selected discount.
+5. Evaluates and applies the applicable discount rules.
 6. Calculates shipping.
 7. Processes the selected payment.
 8. Updates product inventory.
@@ -235,7 +243,7 @@ During order placement, the application:
 10. Clears the cart.
 11. Generates Email and SMS notification information.
 
-The order response contains payment information and generated notification details so that the Angular application can display the complete order confirmation.
+The order response contains payment information, discount and shipping details, and generated notification information so that the Angular application can display the complete order confirmation.
 
 ---
 
@@ -390,6 +398,20 @@ This makes `OrderService` a good candidate for incremental refactoring.
 Payment processing is planned as one of the first areas for refactoring because the baseline implementation contains conditional logic for different payment types.
 
 The refactoring journey will demonstrate how appropriate design patterns can reduce coupling and improve extensibility.
+
+### Discount Refactoring
+
+The baseline implementation evaluates multiple discount rules directly inside the order placement workflow.
+
+Currently, the discount calculation includes percentage discounts, flat discounts, coupon discounts, and a maximum discount limit.
+
+As additional discount rules are introduced, this approach can lead to growing conditional logic and make the discount calculation difficult to extend and maintain.
+
+The discount calculation will be used as a starting point for exploring the **Chain of Responsibility Pattern**.
+
+The refactoring will separate individual discount rules into independent handlers that can evaluate the order sequentially. This will allow new discount rules to be added without continuously increasing the complexity of `OrderService`.
+
+The goal is to demonstrate how Chain of Responsibility can be useful when multiple rules need to be evaluated in a defined sequence.
 
 ### Notification Refactoring
 

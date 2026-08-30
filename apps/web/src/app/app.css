@@ -269,42 +269,89 @@ button:hover {
   margin-top: 20px;
 }
 
-
 /* Confirmation */
 
 .confirmation {
-  background: white;
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
+background: white;
+border: 1px solid #e5e5e5;
+border-radius: 10px;
+padding: 30px 40px;
+max-width: 700px;
+margin: 0 auto;
+}
 
-  text-align: center;
+.confirmation h2 {
+text-align: center;
+margin: 0 0 8px;
+}
 
-  padding: 60px;
+.confirmation > p {
+text-align: center;
+margin: 0 0 20px;
+color: #666;
 }
 
 .success-icon {
-  width: 60px;
-  height: 60px;
+width: 55px;
+height: 55px;
+margin: 0 auto 15px;
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: 50%;
+background: #222;
+color: white;
+font-size: 28px;
+}
 
-  margin: 0 auto 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: #222;
-  color: white;
-
-  font-size: 30px;
+.confirmation h3 {
+margin: 20px 0 8px;
+padding-bottom: 6px;
+border-bottom: 1px solid #eee;
+font-size: 17px;
 }
 
 .confirmation p {
-  color: #666;
-  line-height: 1.8;
+color: #666;
+line-height: 1.5;
+margin: 6px 0;
 }
 
 .confirmation button {
-  margin-top: 15px;
+margin-top: 15px;
+}
+
+/* Order summary */
+
+.confirmation .order-summary {
+display: grid;
+grid-template-columns: 1fr auto;
+gap: 6px 20px;
+padding: 10px 0;
+}
+
+.confirmation .order-summary div {
+padding: 3px 0;
+}
+
+.confirmation .order-summary .amount {
+text-align: right;
+}
+
+.confirmation .order-summary .total {
+border-top: 1px solid #ddd;
+margin-top: 5px;
+padding-top: 10px;
+font-size: 17px;
+color: #222;
+}
+
+/* Notifications */
+
+.confirmation .notification {
+margin: 5px 0;
+padding: 7px 10px;
+background: #f8f8f8;
+border-radius: 6px;
+font-size: 14px;
 }

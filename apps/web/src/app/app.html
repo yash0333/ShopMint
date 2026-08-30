@@ -137,43 +137,20 @@
           </div>
 
           <div class="option-group">
-
-            <h3>Discount</h3>
-
-            <select [(ngModel)]="discountType">
-
-              <option value="NONE">
-                No Discount
-              </option>
-
-              <option value="PERCENTAGE">
-                10% Percentage Discount
-              </option>
-
-              <option value="FLAT">
-                ₹500 Flat Discount
-              </option>
-
-              <option value="COUPON">
-                ₹1,000 Coupon
-              </option>
-            </select>
+            <h3>Coupon</h3>
+            <input type="text" [(ngModel)]="couponCode" placeholder="Enter coupon code" />
           </div>
 
           <div class="option-group">
-
             <h3>Shipping</h3>
-
             <label>
               <input type="radio" name="shipping" value="STANDARD" [(ngModel)]="shippingType">
               Standard — ₹50
             </label>
-
             <label>
               <input type="radio" name="shipping" value="EXPRESS" [(ngModel)]="shippingType">
               Express — ₹150
             </label>
-
           </div>
         </div>
 
@@ -191,54 +168,70 @@
     </section>
 
 
-    <!-- Order Confirmation -->
     @if (order()) {
 
-    <section class="confirmation">
+  <section class="confirmation">
 
-      <div class="success-icon">✓</div>
+<div class="success-icon">✓</div>
 
-      <h2>Order Confirmed!</h2>
+<h2>Order Confirmed!</h2>
 
-      <p>
-        Your order #{{ order()?.id }}
-        has been successfully placed.
-      </p>
+<p>
+  Your order #{{ order()?.id }}
+  has been successfully placed.
+</p>
 
-      <h3>Payment</h3>
+<h3>Payment</h3>
 
-      <p>
-        ✓ {{ order()?.paymentResult?.message }}
-        <br>
-        Method: {{ order()?.paymentResult?.paymentType }}
-      </p>
+<p>
+  ✓ {{ order()?.paymentResult?.message }}
+  <br>
+  Method: {{ order()?.paymentResult?.paymentType }}
+</p>
 
-      <h3>Shipping</h3>
+<h3>Order Summary</h3>
 
-      <p>
-        {{ shippingType }}
-      </p>
+<div class="order-summary">
 
-      <p>
-        Total Amount:
-        <strong>₹{{ order()?.finalAmount }}</strong>
-      </p>
+  <div>Subtotal</div>
+  <div class="amount">
+    ₹{{ order()?.totalAmount }}
+  </div>
 
-      <h3>Notifications</h3>
+  <div>Discount</div>
+  <div class="amount">
+    - ₹{{ order()?.discountAmount }}
+  </div>
 
-      @for (notification of order()?.notifications; track notification.type) {
+  <div>Shipping</div>
+  <div class="amount">
+    ₹{{ order()?.shippingAmount }}
+  </div>
 
-      <p>
-        ✓ {{ notification.message }}
-        <br>
-        {{ notification.type }} → {{ notification.recipient }}
-      </p>
+  <div class="total">
+    <strong>Total Amount</strong>
+  </div>
 
-      }
+  <div class="amount total">
+    <strong>₹{{ order()?.finalAmount }}</strong>
+  </div>
 
-    </section>
+</div>
 
-    }
+<h3>Notifications</h3>
+
+@for (notification of order()?.notifications; track notification.type) {
+
+  <div class="notification">
+    ✓ {{ notification.message }}
+    <br>
+    {{ notification.type }} → {{ notification.recipient }}
+  </div>
+
+}
+  </section>
+
+}
 
 
   </main>

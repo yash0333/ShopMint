@@ -22,13 +22,13 @@ public class OrderController {
     public Order placeOrder(
             @RequestParam int customerId,
             @RequestParam PaymentType paymentType,
-            @RequestParam DiscountType discountType,
+            @RequestParam String couponCode,
             @RequestParam ShippingType shippingType) {
 
         return orderService.placeOrder(
                 customerId,
                 paymentType,
-                discountType,
+                couponCode,
                 shippingType
         );
     }

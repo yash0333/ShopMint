@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
 export class App implements OnInit {
 
   paymentType = 'UPI';
-  discountType = 'PERCENTAGE';
+  couponCode = '';
   shippingType = 'EXPRESS';
   order = signal<any>(null);
   products: Product[] = [];
@@ -112,7 +112,7 @@ this.cart.set(cart);
       .placeOrder(
         this.customerId,
         this.paymentType,
-        this.discountType,
+        this.couponCode,
         this.shippingType)
       .subscribe({
         next: (order) => {

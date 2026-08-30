@@ -15,14 +15,14 @@ export class OrderService {
   placeOrder(
     customerId: number,
     paymentType: string,
-    discountType: string,
+    couponCode: string,
     shippingType: string
   ): Observable<any> {
 
     const url =
       `${this.apiUrl}?customerId=${customerId}` +
       `&paymentType=${paymentType}` +
-      `&discountType=${discountType}` +
+      `&couponCode=${couponCode}` +
       `&shippingType=${shippingType}`;
 
     return this.http.post(url, {});
