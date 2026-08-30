@@ -1,0 +1,246 @@
+<div class="app-container">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">ShopMint</div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Products -->
+    <section class="products-section">
+      <div class="section-header">
+        <div>
+          <h1>Shop Our Products</h1>
+          <p>Everything you need, all in one place.</p>
+        </div>
+      </div>
+
+      <div class="product-grid">
+
+        @for (product of products; track product.id) {
+
+        <div class="product-card">
+
+          <h3>{{ product.name }}</h3>
+
+          <p>{{ product.description }}</p>
+
+          <p>Price: ₹{{ product.price }}</p>
+
+          <p>Available: {{ product.availableQuantity }}</p>
+
+          <button (click)="addToCart(product)">
+            Add to Cart
+          </button>
+
+        </div>
+        }
+      </div>
+    </section>
+
+    <!-- Cart -->
+    <section class="cart-section">
+
+      <div class="section-header">
+        <div>
+          <h2>Your Cart</h2>
+          <p>Review your items before checkout.</p>
+        </div>
+      </div>
+
+      <div class="cart">
+
+        @if (cart() && cart()!.items.length > 0) {
+
+        @for (item of cart()!.items; track item.product.id) {
+
+        <div class="cart-item">
+
+          <div>
+            <h3>{{ item.product.name }}</h3>
+
+            <p>
+              ₹{{ item.product.price }}
+              × {{ item.quantity }}
+            </p>
+          </div>
+
+          <strong>
+            ₹{{ item.product.price * item.quantity }}
+          </strong>
+
+        </div>
+
+        }
+
+        <div class="cart-summary">
+
+          <div>
+            <span>Subtotal</span>
+
+            <strong>
+              ₹{{ calculateCartTotal() }}
+            </strong>
+          </div>
+        </div>
+
+        } @else {
+
+        <p>Your cart is empty.</p>
+
+        }
+
+      </div>
+
+    </section>
+
+    <!-- Checkout -->
+    <section class="checkout-section">
+
+      <div class="section-header">
+        <div>
+          <h2>Checkout</h2>
+          <p>Select your payment, discount and shipping options.</p>
+        </div>
+      </div>
+
+      <div class="checkout">
+
+        <div class="checkout-options">
+
+          <div class="option-group">
+
+            <h3>Payment Method</h3>
+
+            <label>
+              <input type="radio" name="payment" value="UPI" [(ngModel)]="paymentType">
+              UPI
+            </label>
+
+            <label>
+              <input type="radio" name="payment" value="CREDIT_CARD" [(ngModel)]="paymentType">
+              Credit Card
+            </label>
+
+            <label>
+              <input type="radio" name="payment" value="DEBIT_CARD" [(ngModel)]="paymentType">
+              Debit Card
+            </label>
+
+            <label>
+              <input type="radio" name="payment" value="COD" [(ngModel)]="paymentType">
+              Cash on Delivery
+            </label>
+
+          </div>
+
+          <div class="option-group">
+
+            <h3>Discount</h3>
+
+            <select [(ngModel)]="discountType">
+
+              <option value="NONE">
+                No Discount
+              </option>
+
+              <option value="PERCENTAGE">
+                10% Percentage Discount
+              </option>
+
+              <option value="FLAT">
+                ₹500 Flat Discount
+              </option>
+
+              <option value="COUPON">
+                ₹1,000 Coupon
+              </option>
+            </select>
+          </div>
+
+          <div class="option-group">
+
+            <h3>Shipping</h3>
+
+            <label>
+              <input type="radio" name="shipping" value="STANDARD" [(ngModel)]="shippingType">
+              Standard — ₹50
+            </label>
+
+            <label>
+              <input type="radio" name="shipping" value="EXPRESS" [(ngModel)]="shippingType">
+              Express — ₹150
+            </label>
+
+          </div>
+        </div>
+
+        <div class="order-summary">
+          <h3>Order Summary</h3>
+          <div> <span>Items</span> <span>{{ cart()?.items?.length || 0 }}</span> </div>
+          <div> <span>Subtotal</span> <span>₹{{ calculateCartTotal() }}</span> </div>
+          <hr>
+          <div class="final-total"> <span>Total</span> <strong> ₹{{ calculateCartTotal() }} </strong> </div> <button
+            class="place-order-button" (click)="placeOrder()"> Place Order </button>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Order Confirmation -->
+    @if (order()) {
+
+    <section class="confirmation">
+
+      <div class="success-icon">✓</div>
+
+      <h2>Order Confirmed!</h2>
+
+      <p>
+        Your order #{{ order()?.id }}
+        has been successfully placed.
+      </p>
+
+      <h3>Payment</h3>
+
+      <p>
+        ✓ {{ order()?.paymentResult?.message }}
+        <br>
+        Method: {{ order()?.paymentResult?.paymentType }}
+      </p>
+
+      <h3>Shipping</h3>
+
+      <p>
+        {{ shippingType }}
+      </p>
+
+      <p>
+        Total Amount:
+        <strong>₹{{ order()?.finalAmount }}</strong>
+      </p>
+
+      <h3>Notifications</h3>
+
+      @for (notification of order()?.notifications; track notification.type) {
+
+      <p>
+        ✓ {{ notification.message }}
+        <br>
+        {{ notification.type }} → {{ notification.recipient }}
+      </p>
+
+      }
+
+    </section>
+
+    }
+
+
+  </main>
+
+</div>
