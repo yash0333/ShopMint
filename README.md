@@ -72,6 +72,8 @@ ShopMint/
 │   │
 │   └── web/                 # Angular frontend
 │
+├── docs/                    # Detailed feature documentation
+│
 ├── README.md
 ├── .gitignore
 └── .gitattributes
@@ -206,11 +208,11 @@ DELETE /carts/{customerId}
 
 ### Orders
 
-### Orders
-
 ```text
 POST /orders
 GET  /orders/{id}
+
+GET  /orders/customer/{customerId}
 
 POST /orders/{id}/pay
 POST /orders/{id}/ship
