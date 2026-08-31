@@ -1,8 +1,8 @@
 # Notifications
 
-ShopMint generates order notifications after an order is successfully placed.
+ShopMint generates order notifications when important order lifecycle operations are completed.
 
-The current implementation intentionally keeps notification processing simple and creates notification information directly as part of the order placement workflow.
+The current implementation keeps notification processing simple and creates notification information as part of the corresponding order operation.
 
 This provides the baseline for identifying coupling between the order workflow and individual notification mechanisms.
 
@@ -15,7 +15,14 @@ ShopMint currently supports:
 
 ## Notification Processing
 
-After an order is confirmed, ShopMint generates notification information for the supported notification channels.
+Notifications are generated for different order lifecycle events.
+
+Currently, notifications are generated when:
+
+* Payment is completed and the order is confirmed
+* The order is shipped
+* The order is delivered
+* The order is cancelled
 
 The notifications are currently simulated. The application does not connect to any real email or SMS provider.
 
@@ -25,20 +32,30 @@ Each notification contains information such as:
 * Recipient
 * Notification message
 
-The Angular application displays the generated notification information on the order confirmation screen.
+The Angular application displays the generated notification information for the current order.
 
 ## Notification Flow
 
 ```text
-Order Confirmed
+PAYMENT_PENDING
       ↓
-Generate Notifications
+   Pay Order
       ↓
- ┌───────────────┐
- ↓               ↓
-Email            SMS
- ↓               ↓
-Notification    Notification
+  CONFIRMED
+      ↓
+Confirmation Notification
+      ↓
+   ┌───────────────┐
+   ↓               ↓
+  Email            SMS
+```
+
+The same approach is used for other order lifecycle events:
+
+```text
+Ship Order       → Shipping Notification
+Deliver Order    → Delivery Notification
+Cancel Order     → Cancellation Notification
 ```
 
 ## Current Implementation

@@ -14,14 +14,12 @@ export class OrderService {
 
   placeOrder(
     customerId: number,
-    paymentType: string,
     couponCode: string,
     shippingType: string
   ): Observable<any> {
 
     const url =
       `${this.apiUrl}?customerId=${customerId}` +
-      `&paymentType=${paymentType}` +
       `&couponCode=${couponCode}` +
       `&shippingType=${shippingType}`;
 
@@ -30,5 +28,40 @@ export class OrderService {
 
   getOrder(orderId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${orderId}`);
+  }
+
+  payOrder(
+    orderId: number,
+    paymentType: string
+  ): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/${orderId}/pay?paymentType=${paymentType}`,
+      {}
+    );
+  }
+
+  shipOrder(orderId: number): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/${orderId}/ship`,
+      {}
+    );
+  }
+
+  deliverOrder(orderId: number): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/${orderId}/deliver`,
+      {}
+    );
+  }
+
+  cancelOrder(orderId: number): Observable<any> {
+
+    return this.http.post(
+      `${this.apiUrl}/${orderId}/cancel`,
+      {}
+    );
   }
 }

@@ -1,8 +1,8 @@
 package com.shopmint.order;
 
-import com.shopmint.discount.DiscountType;
 import com.shopmint.payment.PaymentType;
 import com.shopmint.shipping.ShippingType;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,13 +21,11 @@ public class OrderController {
     @PostMapping
     public Order placeOrder(
             @RequestParam int customerId,
-            @RequestParam PaymentType paymentType,
             @RequestParam String couponCode,
             @RequestParam ShippingType shippingType) {
 
         return orderService.placeOrder(
                 customerId,
-                paymentType,
                 couponCode,
                 shippingType
         );
@@ -45,11 +43,24 @@ public class OrderController {
         return orderService.getCustomerOrders(customerId);
     }
 
+    @PostMapping("/{id}/pay")
+    public Order payOrder(@PathVariable int id,
+                          @RequestParam PaymentType paymentType) {
+        return orderService.payOrder(id, paymentType);
+    }
+
     @PostMapping("/{id}/cancel")
-    public String cancelOrder(@PathVariable int id) {
+    public Order cancelOrder(@PathVariable int id) {
+        return orderService.cancelOrder(id);
+    }
 
-        orderService.cancelOrder(id);
+    @PostMapping("/{id}/ship")
+    public Order shipOrder(@PathVariable int id) {
+        return orderService.shipOrder(id);
+    }
 
-        return "Order cancelled";
+    @PostMapping("/{id}/deliver")
+    public Order deliverOrder(@PathVariable int id) {
+        return orderService.deliverOrder(id);
     }
 }

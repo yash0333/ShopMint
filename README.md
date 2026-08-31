@@ -33,6 +33,7 @@ The initial application workflow is implemented end-to-end.
 * Customer data
 * Shopping cart
 * Order placement
+* Order lifecycle management
 * Payment processing
 * Discount calculation
 * Shipping calculation
@@ -48,7 +49,8 @@ The initial application workflow is implemented end-to-end.
 * Cart total calculation
 * Checkout options
 * Place Order
-* Order confirmation
+* Order state display
+* Order lifecycle actions
 * Payment result display
 * Email and SMS notification display
 * Integration with Spring Boot REST APIs
@@ -168,8 +170,8 @@ The checkout flow currently supports:
 * Optional coupon code
 * Automatic discount rule evaluation
 * Shipping method selection
-* Order placement
-* Order confirmation
+* Order lifecycle
+* Notifications
 
 Payment, discount, shipping, and notification processing are currently simulated and do not connect to external services.
 
@@ -178,36 +180,7 @@ Detailed requirements:
 * [Payment](docs/payment.md)
 * [Discount](docs/discount.md)
 * [Notification](docs/notification.md)
-
----
-
-## 5.5 Order Management
-
-A customer can place an order using the products in the shopping cart.
-
-The current order flow is:
-
-```text
-Cart
-  ↓
-Checkout
-  ↓
-Payment Selection
-  ↓
-Coupon (Optional)
-  ↓
-Discount Rules Evaluation
-  ↓
-Shipping Selection
-  ↓
-Place Order
-  ↓
-Order Confirmation
-```
-
-During order placement, ShopMint validates the customer and cart, creates the order, calculates the total, applies discounts and shipping, processes payment, updates inventory, stores the order, clears the cart, and generates notification information.
-
-The order response contains the information required by the Angular application to display the order confirmation.
+* [Order-Management](docs/order-management.md)
 
 ---
 
@@ -233,14 +206,19 @@ DELETE /carts/{customerId}
 
 ### Orders
 
+### Orders
+
 ```text
 POST /orders
 GET  /orders/{id}
+
+POST /orders/{id}/pay
+POST /orders/{id}/ship
+POST /orders/{id}/deliver
+POST /orders/{id}/cancel
 ```
 
 The API contracts may evolve as the application grows.
-
----
 
 # 7. Application Architecture
 
@@ -262,13 +240,12 @@ ShopMint currently follows a simple modular-monolith style architecture.
                          ┌────────────┼────────────┐
                          ▼            ▼            ▼
                       Payment      Discount     Shipping
-                         │
-                         ▼
-                  Order Confirmation
-                         │
-                  ┌──────┴──────┐
-                  ▼             ▼
-                Email           SMS
+                                      │
+                                      ▼
+                                Order Lifecycle
+                                      │
+                                      ▼
+                                  Notifications
 ```
 
 The initial implementation intentionally keeps the business logic straightforward.
@@ -315,18 +292,17 @@ These problems will become the motivation for introducing design patterns.
 
 The following patterns are being explored based on design problems identified in the application:
 
-| Pattern                 | Area                      | Status      |
-| ----------------------- | ------------------------- | ----------- |
-| Strategy                | Payment processing        | Implemented |
-| Factory Method          | Payment strategy creation | Implemented |
-| Observer                | Notifications             | Implemented |
-| Chain of Responsibility | Discount processing       | Next        |
-| State                   | Order lifecycle           | Planned     |
-| Builder                 | Object creation           | Planned     |
-| Decorator               | Promotions                | Planned     |
-| Adapter                 | External integrations     | Planned     |
-| Facade                  | Checkout                  | Planned     |
-| Command                 | Cart operations           | Planned     |
+| Pattern                 | Area                     
+| ----------------------- | -------------------------
+| Strategy                | Payment processing       
+| Factory Method          | Payment strategy creation 
+| Observer                | Notifications             
+| Chain of Responsibility | Discount processing       
+| State                   | Order lifecycle           
+
+The current `OrderService` intentionally contains multiple responsibilities and conditional logic. These areas will be refactored incrementally as part of the learning journey.
+
+Detailed business requirements are maintained in the [`docs`](docs/) directory.
 
 A pattern will only be introduced when there is a genuine design problem that justifies its use.
 
@@ -336,24 +312,7 @@ The goal is to understand:
 
 ---
 
-# 10. Current Refactoring Status
-
-The initial implementation is maintained as the baseline for the design-pattern learning journey.
-
-Current progress:
-
-* Strategy — Payment processing — Baseline ready for refactoring
-* Factory Method — Payment strategy creation — Baseline ready for refactoring
-* Observer — Notifications — Baseline ready for refactoring
-* Chain of Responsibility — Discount processing — Baseline ready for refactoring
-
-The current `OrderService` intentionally contains multiple responsibilities and conditional logic. These areas will be refactored incrementally as part of the learning journey.
-
-Detailed business requirements are maintained in the [`docs`](docs/) directory.
-
----
-
-# 11. Future Scope
+# 10. Future Scope
 
 Additional capabilities may be introduced when they help demonstrate new design problems or patterns.
 
@@ -362,8 +321,6 @@ Possible future enhancements include:
 * Product search and filtering
 * Cart quantity updates
 * Customer order history
-* Order cancellation
-* Order status management
 * Database persistence
 * Automated tests
 * External payment integrations
@@ -375,7 +332,7 @@ Features will only be added when they contribute to the learning objectives of t
 
 ---
 
-# 12. Project Philosophy
+# 11. Project Philosophy
 
 ShopMint is intentionally not designed to be a production-ready e-commerce platform.
 

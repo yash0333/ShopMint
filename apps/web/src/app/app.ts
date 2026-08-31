@@ -57,13 +57,13 @@ export class App implements OnInit {
     this.cartService.getCart(this.customerId).subscribe({
       next: (cart) => {
         console.log(
-    'Cart items:',
-    cart.items.map(item => item.product.name)
-  );
+          'Cart items:',
+          cart.items.map(item => item.product.name)
+        );
 
-this.cart.set(cart);
+        this.cart.set(cart);
 
-  console.log('Angular cart updated:', this.cart);
+        console.log('Angular cart updated:', this.cart);
       },
       error: (error) => {
         console.error('Failed to load cart:', error);
@@ -91,27 +91,26 @@ this.cart.set(cart);
       });
   }
 
- calculateCartTotal(): number {
+  calculateCartTotal(): number {
 
-  const cart = this.cart();
+    const cart = this.cart();
 
-  if (!cart) {
-    return 0;
+    if (!cart) {
+      return 0;
+    }
+
+    return cart.items.reduce(
+      (total, item) =>
+        total + item.product.price * item.quantity,
+      0
+    );
   }
-
-  return cart.items.reduce(
-    (total, item) =>
-      total + item.product.price * item.quantity,
-    0
-  );
-}
 
   placeOrder(): void {
 
     this.orderService
       .placeOrder(
         this.customerId,
-        this.paymentType,
         this.couponCode,
         this.shippingType)
       .subscribe({
@@ -126,6 +125,102 @@ this.cart.set(cart);
 
         error: (error) => {
           console.error('Failed to place order:', error);
+        }
+      });
+  }
+
+  payOrder(): void {
+
+    const currentOrder = this.order();
+
+    if (!currentOrder) {
+      return;
+    }
+
+    this.orderService
+      .payOrder(currentOrder.id, this.paymentType)
+      .subscribe({
+        next: (order) => {
+
+          console.log('Payment completed:', order);
+
+          this.order.set(order);
+        },
+
+        error: (error) => {
+          console.error('Failed to complete payment:', error);
+        }
+      });
+  }
+
+  shipOrder(): void {
+
+    const currentOrder = this.order();
+
+    if (!currentOrder) {
+      return;
+    }
+
+    this.orderService
+      .shipOrder(currentOrder.id)
+      .subscribe({
+        next: (order) => {
+
+          console.log('Order shipped:', order);
+
+          this.order.set(order);
+        },
+
+        error: (error) => {
+          console.error('Failed to ship order:', error);
+        }
+      });
+  }
+
+  deliverOrder(): void {
+
+    const currentOrder = this.order();
+
+    if (!currentOrder) {
+      return;
+    }
+
+    this.orderService
+      .deliverOrder(currentOrder.id)
+      .subscribe({
+        next: (order) => {
+
+          console.log('Order delivered:', order);
+
+          this.order.set(order);
+        },
+
+        error: (error) => {
+          console.error('Failed to deliver order:', error);
+        }
+      });
+  }
+
+  cancelOrder(): void {
+
+    const currentOrder = this.order();
+
+    if (!currentOrder) {
+      return;
+    }
+
+    this.orderService
+      .cancelOrder(currentOrder.id)
+      .subscribe({
+        next: (order) => {
+
+          console.log('Order cancelled:', order);
+
+          this.order.set(order);
+        },
+
+        error: (error) => {
+          console.error('Failed to cancel order:', error);
         }
       });
   }

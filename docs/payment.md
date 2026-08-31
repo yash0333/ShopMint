@@ -17,7 +17,9 @@ The following payment methods are currently supported:
 
 During checkout, the customer selects a payment method.
 
-The selected payment method is then processed during order placement.
+When the customer places an order, the order is created with the `PAYMENT_PENDING` status. Payment is not processed at this stage.
+
+The selected payment method is processed when the customer explicitly performs the payment operation.
 
 The payment processing is currently simulated. ShopMint does not connect to any real payment gateway or external payment service.
 
@@ -36,11 +38,15 @@ Select Payment Method
    ↓
 Place Order
    ↓
+PAYMENT_PENDING
+   ↓
+Pay Order
+   ↓
 Process Payment
    ↓
 Payment Result
    ↓
-Order Confirmation
+CONFIRMED
 ```
 
 ## Current Implementation

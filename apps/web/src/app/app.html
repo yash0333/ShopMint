@@ -167,14 +167,51 @@
 
         <section class="confirmation">
 
-          <div class="success-icon">✓</div>
+          <div class="success-icon">
+            @if (order()?.status === 'CANCELLED') {
+            ×
+            } @else {
+            ✓
+            }
+          </div>
 
-          <h2>Order Confirmed!</h2>
+          <h2>Order #{{ order()?.id }}</h2>
 
           <p>
-            Your order #{{ order()?.id }}
-            has been successfully placed.
+            Status:
+            <strong>{{ order()?.status }}</strong>
           </p>
+
+
+          <!-- Payment Pending -->
+
+          @if (order()?.status === 'PAYMENT_PENDING') {
+
+          <h3>Payment Pending</h3>
+
+          <p>
+            Your order has been placed successfully.
+            Please complete the payment to confirm your order.
+          </p>
+
+          <p>
+            Payment Method: <strong>{{ paymentType }}</strong>
+          </p>
+
+          <button class="action-button" (click)="payOrder()">
+            Complete Payment
+          </button>
+
+          <button class="cancel-button" (click)="cancelOrder()">
+            Cancel Order
+          </button>
+
+          }
+
+
+          <!-- Confirmed -->
+
+          @if (order()?.status === 'CONFIRMED') {
 
           <h3>Payment</h3>
 
@@ -183,6 +220,62 @@
             <br>
             Method: {{ order()?.paymentResult?.paymentType }}
           </p>
+
+          <button class="action-button" (click)="shipOrder()">
+            Ship Order
+          </button>
+
+          <button class="cancel-button" (click)="cancelOrder()">
+            Cancel Order
+          </button>
+
+          }
+
+
+          <!-- Shipped -->
+
+          @if (order()?.status === 'SHIPPED') {
+
+          <h3>Order Shipped</h3>
+
+          <p>
+            Your order has been shipped successfully.
+          </p>
+
+          <button class="action-button" (click)="deliverOrder()">
+            Mark as Delivered
+          </button>
+
+          }
+
+
+          <!-- Delivered -->
+
+          @if (order()?.status === 'DELIVERED') {
+
+          <h3>Order Delivered</h3>
+
+          <p>
+            ✓ Your order has been successfully delivered.
+          </p>
+
+          }
+
+
+          <!-- Cancelled -->
+
+          @if (order()?.status === 'CANCELLED') {
+
+          <h3>Order Cancelled</h3>
+
+          <p>
+            This order has been cancelled.
+          </p>
+
+          }
+
+
+          <!-- Order Summary -->
 
           <h3>Order Summary</h3>
 
@@ -213,9 +306,17 @@
 
           </div>
 
+
+          <!-- Notifications -->
+
+          @if (order()?.notifications?.length) {
+
           <h3>Notifications</h3>
 
-          @for (notification of order()?.notifications; track notification.type) {
+          @for (
+          notification of order()?.notifications;
+          track notification.type
+          ) {
 
           <div class="notification">
             ✓ {{ notification.message }}
@@ -224,6 +325,9 @@
           </div>
 
           }
+
+          }
+
         </section>
 
         }

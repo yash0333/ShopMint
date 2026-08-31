@@ -10,6 +10,7 @@ import com.shopmint.notification.OrderNotification;
 import com.shopmint.payment.PaymentResult;
 import com.shopmint.payment.PaymentType;
 import com.shopmint.product.Product;
+import com.shopmint.product.ProductService;
 import com.shopmint.shipping.ShippingType;
 import org.springframework.stereotype.Service;
 
@@ -25,18 +26,20 @@ public class OrderService {
 
     private final CustomerService customerService;
     private final CartService cartService;
+    private final ProductService productService;
 
     private int orderId = 1;
     private boolean festivalSaleActive = true;
 
     public OrderService(CustomerService customerService,
-                        CartService cartService) {
+                        CartService cartService,
+                        ProductService productService) {
         this.customerService = customerService;
         this.cartService = cartService;
+        this.productService = productService;
     }
 
     public Order placeOrder(int customerId,
-                            PaymentType paymentType,
                             String couponCode,
                             ShippingType shippingType) {
 
@@ -69,9 +72,7 @@ public class OrderService {
             if (product.getAvailableQuantity()
                     < cartItem.getQuantity()) {
 
-                throw new RuntimeException(
-                        "Insufficient quantity for product: "
-                                + product.getName());
+                throw new RuntimeException("Insufficient quantity for product: " + product.getName());
             }
 
             OrderItem orderItem = new OrderItem(
@@ -83,8 +84,7 @@ public class OrderService {
 
             orderItems.add(orderItem);
 
-            totalAmount += product.getPrice()
-                    * cartItem.getQuantity();
+            totalAmount += product.getPrice() * cartItem.getQuantity();
         }
 
         order.setItems(orderItems);
@@ -151,6 +151,53 @@ public class OrderService {
         // Process payment
         order.setStatus(OrderStatus.PAYMENT_PENDING);
 
+        // Update inventory
+        for (CartItem cartItem : cart.getItems()) {
+
+            Product product = cartItem.getProduct();
+
+            product.setAvailableQuantity(
+                    product.getAvailableQuantity()
+                            - cartItem.getQuantity()
+            );
+        }
+
+        // Save order
+        orders.put(order.getId(), order);
+
+        // Clear cart
+        cartService.clearCart(customerId);
+
+        return order;
+    }
+
+    public Order getOrder(int orderId) {
+        return orders.get(orderId);
+    }
+
+    public List<Order> getCustomerOrders(int customerId) {
+
+        List<Order> customerOrders = new ArrayList<>();
+
+        for (Order order : orders.values()) {
+
+            if (order.getCustomerId() == customerId) {
+                customerOrders.add(order);
+            }
+        }
+
+        return customerOrders;
+    }
+
+    public Order payOrder(int orderId, PaymentType paymentType) {
+
+        Order order = getOrderOrThrow(orderId);
+
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
+            throw new RuntimeException("Payment can only be completed for orders in PAYMENT_PENDING state");
+        }
+
+        double finalAmount = order.getFinalAmount();
         PaymentResult paymentResult = null;
 
         if (paymentType == PaymentType.CREDIT_CARD) {
@@ -193,69 +240,87 @@ public class OrderService {
 
         order.setPaymentResult(paymentResult);
 
-        // Update inventory
-        for (CartItem cartItem : cart.getItems()) {
-
-            Product product = cartItem.getProduct();
-
-            product.setAvailableQuantity(
-                    product.getAvailableQuantity()
-                            - cartItem.getQuantity()
-            );
-        }
-
-        // Confirm order
         order.setStatus(OrderStatus.CONFIRMED);
 
-        // Save order
-        orders.put(order.getId(), order);
-
-        // Clear cart
-        cartService.clearCart(customerId);
-
         // Send notifications
-        List<OrderNotification> notifications = new ArrayList<>();
-
-        notifications.add(
-                new OrderNotification(
-                        "EMAIL",
-                        customer.getEmail(),
-                        "Order confirmation email sent"
-                )
+        sendOrderNotification(
+                order,
+                "Order confirmation email sent",
+                "Order confirmation SMS sent"
         );
-
-        notifications.add(
-                new OrderNotification(
-                        "SMS",
-                        customer.getPhone(),
-                        "Order confirmation SMS sent"
-                )
-        );
-
-        order.setNotifications(notifications);
 
         return order;
     }
 
-    public Order getOrder(int orderId) {
-        return orders.get(orderId);
+    public Order shipOrder(int orderId) {
+
+        Order order = getOrderOrThrow(orderId);
+
+        if (order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new RuntimeException("Only confirmed orders can be shipped");
+        }
+
+        order.setStatus(OrderStatus.SHIPPED);
+        sendOrderNotification(
+                order,
+                "Order shipping email sent",
+                "Order shipping SMS sent"
+        );
+
+        return order;
     }
 
-    public List<Order> getCustomerOrders(int customerId) {
+    public Order deliverOrder(int orderId) {
 
-        List<Order> customerOrders = new ArrayList<>();
+        Order order = getOrderOrThrow(orderId);
 
-        for (Order order : orders.values()) {
+        if (order.getStatus() != OrderStatus.SHIPPED) {
+            throw new RuntimeException("Only shipped orders can be delivered");
+        }
 
-            if (order.getCustomerId() == customerId) {
-                customerOrders.add(order);
+        order.setStatus(OrderStatus.DELIVERED);
+        sendOrderNotification(
+                order,
+                "Order delivery email sent",
+                "Order delivery SMS sent"
+        );
+        return order;
+    }
+
+    public Order cancelOrder(int orderId) {
+
+        Order order = getOrderOrThrow(orderId);
+
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING
+                && order.getStatus() != OrderStatus.CONFIRMED) {
+
+            throw new RuntimeException("Order cannot be cancelled in " + order.getStatus() + " state");
+        }
+
+        // Restore inventory
+        for (OrderItem orderItem : order.getItems()) {
+
+            Product product = productService.getProduct(orderItem.getProductId());
+
+            if (product != null) {
+                product.setAvailableQuantity(
+                        product.getAvailableQuantity()
+                                + orderItem.getQuantity()
+                );
             }
         }
 
-        return customerOrders;
+        order.setStatus(OrderStatus.CANCELLED);
+        sendOrderNotification(
+                order,
+                "Order cancellation email sent",
+                "Order cancellation SMS sent"
+        );
+
+        return order;
     }
 
-    public void cancelOrder(int orderId) {
+    private Order getOrderOrThrow(int orderId) {
 
         Order order = orders.get(orderId);
 
@@ -263,14 +328,35 @@ public class OrderService {
             throw new RuntimeException("Order not found");
         }
 
-        if (order.getStatus() == OrderStatus.DELIVERED) {
-            throw new RuntimeException(
-                    "Delivered order cannot be cancelled");
-        }
+        return order;
+    }
 
-        order.setStatus(OrderStatus.CANCELLED);
+    private void sendOrderNotification(
+            Order order,
+            String emailMessage,
+            String smsMessage) {
 
-        System.out.println(
-                "Order " + orderId + " cancelled");
+        Customer customer =
+                customerService.getCustomer(order.getCustomerId());
+
+        List<OrderNotification> notifications = new ArrayList<>();
+
+        notifications.add(
+                new OrderNotification(
+                        "EMAIL",
+                        customer.getEmail(),
+                        emailMessage
+                )
+        );
+
+        notifications.add(
+                new OrderNotification(
+                        "SMS",
+                        customer.getPhone(),
+                        smsMessage
+                )
+        );
+
+        order.setNotifications(notifications);
     }
 }
