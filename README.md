@@ -290,31 +290,7 @@ These problems will become the motivation for introducing design patterns.
 
 ---
 
-## 9. Design Pattern Roadmap
-
-The following patterns are being explored based on design problems identified in the application:
-
-| Pattern                 | Area                     
-| ----------------------- | -------------------------
-| Strategy                | Payment processing       
-| Factory Method          | Payment strategy creation 
-| Observer                | Notifications             
-| Chain of Responsibility | Discount processing       
-| State                   | Order lifecycle           
-
-The current `OrderService` intentionally contains multiple responsibilities and conditional logic. These areas will be refactored incrementally as part of the learning journey.
-
-Detailed business requirements are maintained in the [`docs`](docs/) directory.
-
-A pattern will only be introduced when there is a genuine design problem that justifies its use.
-
-The goal is to understand:
-
-> What problem does the pattern solve, why is it useful, and what trade-offs does it introduce?
-
----
-
-# 10. Future Scope
+# 9. Future Scope
 
 Additional capabilities may be introduced when they help demonstrate new design problems or patterns.
 
@@ -334,7 +310,7 @@ Features will only be added when they contribute to the learning objectives of t
 
 ---
 
-# 11. Project Philosophy
+# 10. Project Philosophy
 
 ShopMint is intentionally not designed to be a production-ready e-commerce platform.
 
