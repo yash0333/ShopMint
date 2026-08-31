@@ -56,14 +56,9 @@ export class App implements OnInit {
 
     this.cartService.getCart(this.customerId).subscribe({
       next: (cart) => {
-        console.log(
-          'Cart items:',
-          cart.items.map(item => item.product.name)
-        );
 
         this.cart.set(cart);
 
-        console.log('Angular cart updated:', this.cart);
       },
       error: (error) => {
         console.error('Failed to load cart:', error);
@@ -78,12 +73,7 @@ export class App implements OnInit {
       .addToCart(this.customerId, product.id, 1)
       .subscribe({
         next: () => {
-          console.log('Product added:', product.name);
-
           this.loadCart();
-
-          console.log('After load cart called: ', this.cart);
-
         },
         error: (error) => {
           console.error('Failed to add product:', error);
@@ -115,9 +105,6 @@ export class App implements OnInit {
         this.shippingType)
       .subscribe({
         next: (order) => {
-
-          console.log('Order placed:', order);
-
           this.order.set(order);
 
           this.loadCart();
@@ -141,9 +128,6 @@ export class App implements OnInit {
       .payOrder(currentOrder.id, this.paymentType)
       .subscribe({
         next: (order) => {
-
-          console.log('Payment completed:', order);
-
           this.order.set(order);
         },
 
@@ -165,9 +149,6 @@ export class App implements OnInit {
       .shipOrder(currentOrder.id)
       .subscribe({
         next: (order) => {
-
-          console.log('Order shipped:', order);
-
           this.order.set(order);
         },
 
@@ -189,9 +170,6 @@ export class App implements OnInit {
       .deliverOrder(currentOrder.id)
       .subscribe({
         next: (order) => {
-
-          console.log('Order delivered:', order);
-
           this.order.set(order);
         },
 
@@ -213,9 +191,6 @@ export class App implements OnInit {
       .cancelOrder(currentOrder.id)
       .subscribe({
         next: (order) => {
-
-          console.log('Order cancelled:', order);
-
           this.order.set(order);
         },
 

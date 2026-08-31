@@ -166,173 +166,93 @@
       </div>
 
       @if (order()) {
+      <section class="confirmation">
 
-        <section class="confirmation">
-
-          <div class="success-icon">
-            @if (order()?.status === 'CANCELLED') {
-            ×
-            } @else {
-            ✓
-            }
+        <div class="confirmation-header">
+          <div class="success-icon" [class.cancelled]="order()?.status === 'CANCELLED'">
+            @if (order()?.status === 'CANCELLED') { × } @else { ✓ }
           </div>
-
-          <h2>Order #{{ order()?.id }}</h2>
-
-          <p>
-            Status:
-            <strong>{{ order()?.status }}</strong>
-          </p>
-
-
-          <!-- Payment Pending -->
-
-          @if (order()?.status === 'PAYMENT_PENDING') {
-
-          <h3>Payment Pending</h3>
-
-          <p>
-            Your order has been placed successfully.
-            Please complete the payment to confirm your order.
-          </p>
-
-          <p>
-            Payment Method: <strong>{{ paymentType }}</strong>
-          </p>
-
-          <button class="action-button" (click)="payOrder()">
-            Complete Payment
-          </button>
-
-          <button class="cancel-button" (click)="cancelOrder()">
-            Cancel Order
-          </button>
-
-          }
-
-
-          <!-- Confirmed -->
-
-          @if (order()?.status === 'CONFIRMED') {
-
-          <h3>Payment</h3>
-
-          <p>
-            ✓ {{ order()?.paymentResult?.message }}
-            <br>
-            Method: {{ order()?.paymentResult?.paymentType }}
-          </p>
-
-          <button class="action-button" (click)="shipOrder()">
-            Ship Order
-          </button>
-
-          <button class="cancel-button" (click)="cancelOrder()">
-            Cancel Order
-          </button>
-
-          }
-
-
-          <!-- Shipped -->
-
-          @if (order()?.status === 'SHIPPED') {
-
-          <h3>Order Shipped</h3>
-
-          <p>
-            Your order has been shipped successfully.
-          </p>
-
-          <button class="action-button" (click)="deliverOrder()">
-            Mark as Delivered
-          </button>
-
-          }
-
-
-          <!-- Delivered -->
-
-          @if (order()?.status === 'DELIVERED') {
-
-          <h3>Order Delivered</h3>
-
-          <p>
-            ✓ Your order has been successfully delivered.
-          </p>
-
-          }
-
-
-          <!-- Cancelled -->
-
-          @if (order()?.status === 'CANCELLED') {
-
-          <h3>Order Cancelled</h3>
-
-          <p>
-            This order has been cancelled.
-          </p>
-
-          }
-
-
-          <!-- Order Summary -->
-
-          <h3>Order Summary</h3>
-
-          <div class="order-summary">
-
-            <div>Subtotal</div>
-            <div class="amount">
-              ₹{{ order()?.totalAmount }}
-            </div>
-
-            <div>Discount</div>
-            <div class="amount">
-              - ₹{{ order()?.discountAmount }}
-            </div>
-
-            <div>Shipping</div>
-            <div class="amount">
-              ₹{{ order()?.shippingAmount }}
-            </div>
-
-            <div class="total">
-              <strong>Total Amount</strong>
-            </div>
-
-            <div class="amount total">
-              <strong>₹{{ order()?.finalAmount }}</strong>
-            </div>
-
+          <div>
+            <h2>Order #{{ order()?.id }}</h2>
+            <p class="confirmation-status-text">
+              Status: <strong>{{ order()?.status }}</strong>
+            </p>
           </div>
+        </div>
 
+        <!-- Payment Pending -->
+        @if (order()?.status === 'PAYMENT_PENDING') {
+        <h3>Payment Pending</h3>
+        <p>Your order has been placed successfully. Please complete the payment to confirm your order.</p>
+        <p>Payment Method: <strong>{{ paymentType }}</strong></p>
 
-          <!-- Notifications -->
-
-          @if (order()?.notifications?.length) {
-
-          <h3>Notifications</h3>
-
-          @for (
-          notification of order()?.notifications;
-          track notification.type
-          ) {
-
-          <div class="notification">
-            ✓ {{ notification.message }}
-            <br>
-            {{ notification.type }} → {{ notification.recipient }}
-          </div>
-
-          }
-
-          }
-
-        </section>
-
+        <button class="action-button" (click)="payOrder()">Complete Payment</button>
+        <button class="cancel-button" (click)="cancelOrder()">Cancel Order</button>
         }
+
+        <!-- Confirmed -->
+        @if (order()?.status === 'CONFIRMED') {
+        <h3>Payment Confirmed</h3>
+        <p>✓ {{ order()?.paymentResult?.message }}</p>
+        <p>Method: <strong>{{ order()?.paymentResult?.paymentType }}</strong></p>
+
+        <button class="action-button" (click)="shipOrder()">Ship Order</button>
+        <button class="cancel-button" (click)="cancelOrder()">Cancel Order</button>
+        }
+
+        <!-- Shipped -->
+        @if (order()?.status === 'SHIPPED') {
+        <h3>Order Shipped</h3>
+        <p>Your order has been shipped successfully.</p>
+        <button class="action-button" (click)="deliverOrder()">Mark as Delivered</button>
+        }
+
+        <!-- Delivered -->
+        @if (order()?.status === 'DELIVERED') {
+        <h3>Order Delivered</h3>
+        <p>✓ Your order has been successfully delivered.</p>
+        }
+
+        <!-- Cancelled -->
+        @if (order()?.status === 'CANCELLED') {
+        <h3>Order Cancelled</h3>
+        <p>This order has been cancelled.</p>
+        }
+
+        <!-- Order Summary -->
+        <h3>Order Breakdown</h3>
+        <div class="confirmation-summary-table">
+          <div class="confirmation-summary-row">
+            <span>Subtotal</span>
+            <span>₹{{ order()?.totalAmount }}</span>
+          </div>
+          <div class="confirmation-summary-row">
+            <span>Discount</span>
+            <span>- ₹{{ order()?.discountAmount }}</span>
+          </div>
+          <div class="confirmation-summary-row">
+            <span>Shipping</span>
+            <span>₹{{ order()?.shippingAmount }}</span>
+          </div>
+          <div class="confirmation-summary-row total">
+            <span>Total Amount</span>
+            <span>₹{{ order()?.finalAmount }}</span>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        @if (order()?.notifications?.length) {
+        <h3>Notifications</h3>
+        @for (notification of order()?.notifications; track notification.type) {
+        <div class="notification">
+          <strong>✓ {{ notification.message }}</strong><br>
+          <span style="color: #777;">{{ notification.type }} → {{ notification.recipient }}</span>
+        </div>
+        }
+        }
+
+      </section>
+      }
 
     </section>
 
