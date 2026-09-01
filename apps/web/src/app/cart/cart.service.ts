@@ -21,12 +21,10 @@ export class CartService {
 
   addToCart(
     customerId: number,
-    productId: number,
-    quantity: number
-  ): Observable<string> {
+    productId: number): Observable<string> {
 
     return this.http.post(
-      `${this.apiUrl}/${customerId}/items?productId=${productId}&quantity=${quantity}`,
+      `${this.apiUrl}/${customerId}/items?productId=${productId}`,
       {},
       { responseType: 'text' }
     );

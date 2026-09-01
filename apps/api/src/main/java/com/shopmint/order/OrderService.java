@@ -143,7 +143,7 @@ public class OrderService {
                 amountAfterDiscount + shippingAmount;
 
         if (finalAmount < 0) {
-            throw new IllegalArgumentException("Order amount cannot be negative");
+            throw new RuntimeException("Order amount cannot be negative");
         }
 
         order.setFinalAmount(finalAmount);
@@ -151,16 +151,8 @@ public class OrderService {
         // Process payment
         order.setStatus(OrderStatus.PAYMENT_PENDING);
 
-        // Update inventory
-        for (CartItem cartItem : cart.getItems()) {
-
-            Product product = cartItem.getProduct();
-
-            product.setAvailableQuantity(
-                    product.getAvailableQuantity()
-                            - cartItem.getQuantity()
-            );
-        }
+        // Reserve inventory
+        reserveInventory(cart.getItems());
 
         // Save order
         orders.put(order.getId(), order);
@@ -240,6 +232,9 @@ public class OrderService {
 
         order.setPaymentResult(paymentResult);
 
+        // Confirm inventory reservation
+        confirmInventory(order);
+
         order.setStatus(OrderStatus.CONFIRMED);
 
         // Send notifications
@@ -297,18 +292,12 @@ public class OrderService {
             throw new RuntimeException("Order cannot be cancelled in " + order.getStatus() + " state");
         }
 
-        // Restore inventory
-        for (OrderItem orderItem : order.getItems()) {
-
-            Product product = productService.getProduct(orderItem.getProductId());
-
-            if (product != null) {
-                product.setAvailableQuantity(
-                        product.getAvailableQuantity()
-                                + orderItem.getQuantity()
-                );
-            }
-        }
+        // Release inventory reservation
+        if (order.getStatus() == OrderStatus.PAYMENT_PENDING) {
+            releaseInventory(order);
+        } else if (order.getStatus() == OrderStatus.CONFIRMED) {
+            restoreInventory(order);
+        };
 
         order.setStatus(OrderStatus.CANCELLED);
         sendOrderNotification(
@@ -329,6 +318,71 @@ public class OrderService {
         }
 
         return order;
+    }
+
+    private void reserveInventory(List<CartItem> cartItems) {
+        for (CartItem cartItem : cartItems) {
+            Product product = cartItem.getProduct();
+
+            if (product.getAvailableQuantity() < cartItem.getQuantity()) {
+                throw new RuntimeException(
+                        "Insufficient quantity for product: " + product.getName());
+            }
+
+            product.setAvailableQuantity(
+                    product.getAvailableQuantity() - cartItem.getQuantity());
+
+            product.setReservedQuantity(
+                    product.getReservedQuantity() + cartItem.getQuantity());
+        }
+    }
+
+    private void confirmInventory(Order order) {
+        for (OrderItem orderItem : order.getItems()) {
+
+            Product product =
+                    productService.getProduct(orderItem.getProductId());
+
+            if (product != null) {
+                product.setReservedQuantity(
+                        product.getReservedQuantity()
+                                - orderItem.getQuantity());
+            }
+        }
+    }
+
+    private void releaseInventory(Order order) {
+        for (OrderItem orderItem : order.getItems()) {
+
+            Product product =
+                    productService.getProduct(orderItem.getProductId());
+
+            if (product != null) {
+
+                product.setAvailableQuantity(
+                        product.getAvailableQuantity()
+                                + orderItem.getQuantity());
+
+                product.setReservedQuantity(
+                        product.getReservedQuantity()
+                                - orderItem.getQuantity());
+            }
+        }
+    }
+
+    private void restoreInventory(Order order) {
+        for (OrderItem orderItem : order.getItems()) {
+
+            Product product =
+                    productService.getProduct(orderItem.getProductId());
+
+            if (product != null) {
+
+                product.setAvailableQuantity(
+                        product.getAvailableQuantity()
+                                + orderItem.getQuantity());
+            }
+        }
     }
 
     private void sendOrderNotification(

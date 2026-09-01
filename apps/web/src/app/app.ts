@@ -19,12 +19,11 @@ export class App implements OnInit {
   paymentType = 'UPI';
   couponCode = '';
   shippingType = 'EXPRESS';
-  order = signal<any>(null);
-  products: Product[] = [];
-
-  cart = signal<Cart | null>(null);
-
   customerId = 1;
+
+  order = signal<any>(null);
+  products = signal<Product[]>([]);
+  cart = signal<Cart | null>(null);
 
   constructor(
     private productService: ProductService,
@@ -44,10 +43,10 @@ export class App implements OnInit {
 
     this.productService.getProducts().subscribe({
       next: (products) => {
-        this.products = products;
+        this.products.set(products);
       },
       error: (error) => {
-        console.error('Failed to load products:', error);
+        alert(error.error);
       }
     });
   }
@@ -61,7 +60,7 @@ export class App implements OnInit {
 
       },
       error: (error) => {
-        console.error('Failed to load cart:', error);
+        alert(error.error);
       }
     });
   }
@@ -70,13 +69,13 @@ export class App implements OnInit {
     console.log('Before add:', this.cart);
 
     this.cartService
-      .addToCart(this.customerId, product.id, 1)
+      .addToCart(this.customerId, product.id)
       .subscribe({
         next: () => {
           this.loadCart();
         },
         error: (error) => {
-          console.error('Failed to add product:', error);
+          alert(error.error);
         }
       });
   }
@@ -106,12 +105,12 @@ export class App implements OnInit {
       .subscribe({
         next: (order) => {
           this.order.set(order);
-
           this.loadCart();
+          this.loadProducts();
         },
 
         error: (error) => {
-          console.error('Failed to place order:', error);
+          alert(error.error);
         }
       });
   }
@@ -129,10 +128,11 @@ export class App implements OnInit {
       .subscribe({
         next: (order) => {
           this.order.set(order);
+          this.loadProducts();
         },
 
         error: (error) => {
-          console.error('Failed to complete payment:', error);
+          alert(error.error);
         }
       });
   }
@@ -153,7 +153,7 @@ export class App implements OnInit {
         },
 
         error: (error) => {
-          console.error('Failed to ship order:', error);
+          alert(error.error);
         }
       });
   }
@@ -174,7 +174,7 @@ export class App implements OnInit {
         },
 
         error: (error) => {
-          console.error('Failed to deliver order:', error);
+          alert(error.error);
         }
       });
   }
@@ -192,10 +192,11 @@ export class App implements OnInit {
       .subscribe({
         next: (order) => {
           this.order.set(order);
+          this.loadProducts();
         },
 
         error: (error) => {
-          console.error('Failed to cancel order:', error);
+          alert(error.error);
         }
       });
   }

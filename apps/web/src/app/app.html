@@ -19,7 +19,7 @@
 
       <div class="product-grid">
 
-        @for (product of products; track product.id) {
+        @for (product of products(); track product.id) {
 
         <div class="product-card">
 
@@ -31,8 +31,11 @@
 
           <p>Available: {{ product.availableQuantity }}</p>
 
-          <button (click)="addToCart(product)">
-            Add to Cart
+          <p>Reserved: {{ product.reservedQuantity }}</p>
+
+          <button [disabled]="product.availableQuantity <= 0" 
+            (click)="addToCart(product)">
+            {{ product.availableQuantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
           </button>
 
         </div>
@@ -183,7 +186,8 @@
         <!-- Payment Pending -->
         @if (order()?.status === 'PAYMENT_PENDING') {
         <h3>Payment Pending</h3>
-        <p>Your order has been placed successfully. Please complete the payment to confirm your order.</p>
+        <p>Your order has been placed successfully. 
+          Your items have been reserved until payment is completed.</p>
         <p>Payment Method: <strong>{{ paymentType }}</strong></p>
 
         <button class="action-button" (click)="payOrder()">Complete Payment</button>
@@ -193,7 +197,7 @@
         <!-- Confirmed -->
         @if (order()?.status === 'CONFIRMED') {
         <h3>Payment Confirmed</h3>
-        <p>✓ {{ order()?.paymentResult?.message }}</p>
+        <p>✓ {{ order()?.paymentResult?.message }}. The reserved stock has been confirmed.</p>
         <p>Method: <strong>{{ order()?.paymentResult?.paymentType }}</strong></p>
 
         <button class="action-button" (click)="shipOrder()">Ship Order</button>
@@ -216,7 +220,7 @@
         <!-- Cancelled -->
         @if (order()?.status === 'CANCELLED') {
         <h3>Order Cancelled</h3>
-        <p>This order has been cancelled.</p>
+        <p>This order has been cancelled  and the reserved stock has been released.</p>
         }
 
         <!-- Order Summary -->

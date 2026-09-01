@@ -27,7 +27,7 @@ public class CartService {
         return carts.get(customerId);
     }
 
-    public void addToCart(int customerId, int productId, int quantity) {
+    public void addToCart(int customerId, int productId) {
 
         Product product = productService.getProduct(productId);
 
@@ -35,21 +35,28 @@ public class CartService {
             throw new RuntimeException("Product not found");
         }
 
-        if (product.getAvailableQuantity() < quantity) {
-            throw new RuntimeException("Insufficient product quantity");
-        }
-
         Cart cart = getCart(customerId);
 
         for (CartItem item : cart.getItems()) {
 
             if (item.getProduct().getId() == productId) {
-                item.setQuantity(item.getQuantity() + quantity);
+
+                int requestedQuantity = item.getQuantity() + 1;
+
+                if (requestedQuantity > product.getAvailableQuantity()) {
+                    throw new RuntimeException("Insufficient product quantity");
+                }
+
+                item.setQuantity(requestedQuantity);
                 return;
             }
         }
 
-        cart.getItems().add(new CartItem(product, quantity));
+        if (product.getAvailableQuantity() <= 0) {
+            throw new RuntimeException("Insufficient product quantity");
+        }
+
+        cart.getItems().add(new CartItem(product, 1));
     }
 
     public void removeFromCart(int customerId, int productId) {

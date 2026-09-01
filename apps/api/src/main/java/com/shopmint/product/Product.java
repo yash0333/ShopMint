@@ -7,6 +7,7 @@ public class Product {
     private ProductCategory category;
     private double price;
     private int availableQuantity;
+    private int reservedQuantity;
 
     public Product(int id, String name, String description,
                    ProductCategory category, double price,
@@ -17,6 +18,7 @@ public class Product {
         this.category = category;
         this.price = price;
         this.availableQuantity = availableQuantity;
+        this.reservedQuantity = 0;
     }
 
     public int getId() {
@@ -65,5 +67,13 @@ public class Product {
 
     public void setAvailableQuantity(int availableQuantity) {
         this.availableQuantity = availableQuantity;
+    }
+
+    public int getReservedQuantity() {
+        return reservedQuantity;
+    }
+
+    public void setReservedQuantity(int reserveQuantity) {
+        this.reservedQuantity = reserveQuantity;
     }
 }
