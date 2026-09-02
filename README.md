@@ -32,6 +32,7 @@ The initial application workflow is implemented end-to-end.
 * Product management
 * Customer data
 * Shopping cart
+* Inventory availability and stock reservation
 * Order placement
 * Order lifecycle management
 * Payment processing
@@ -172,6 +173,7 @@ The checkout flow currently supports:
 * Optional coupon code
 * Automatic discount rule evaluation
 * Shipping method selection
+* Inventory stock reservation
 * Order lifecycle
 * Notifications
 
