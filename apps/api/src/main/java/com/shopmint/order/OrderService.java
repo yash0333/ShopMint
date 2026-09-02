@@ -7,8 +7,7 @@ import com.shopmint.customer.Customer;
 import com.shopmint.customer.CustomerService;
 import com.shopmint.discount.DiscountType;
 import com.shopmint.notification.OrderNotification;
-import com.shopmint.payment.PaymentResult;
-import com.shopmint.payment.PaymentType;
+import com.shopmint.payment.*;
 import com.shopmint.product.Product;
 import com.shopmint.product.ProductService;
 import com.shopmint.shipping.ShippingType;
@@ -189,47 +188,23 @@ public class OrderService {
             throw new RuntimeException("Payment can only be completed for orders in PAYMENT_PENDING state");
         }
 
-        double finalAmount = order.getFinalAmount();
-        PaymentResult paymentResult = null;
-
+        PaymentStrategy paymentStrategy = null;
         if (paymentType == PaymentType.CREDIT_CARD) {
-
-            paymentResult = new PaymentResult(
-                    paymentType.name(),
-                    true,
-                    "Processing Credit Card payment: ₹" + finalAmount
-            );
-
+            paymentStrategy = new CreditCardPaymentStrategy();
         } else if (paymentType == PaymentType.DEBIT_CARD) {
-
-            paymentResult = new PaymentResult(
-                    paymentType.name(),
-                    true,
-                    "Processing Debit Card payment: ₹" + finalAmount
-            );
-
+            paymentStrategy = new DebitCardPaymentStrategy();
         } else if (paymentType == PaymentType.UPI) {
-
-            paymentResult = new PaymentResult(
-                    paymentType.name(),
-                    true,
-                    "Processing UPI payment: ₹" + finalAmount
-            );
-
+            paymentStrategy = new UpiPaymentStrategy();
         } else if (paymentType == PaymentType.COD) {
-
-            paymentResult = new PaymentResult(
-                    paymentType.name(),
-                    true,
-                    "Cash on Delivery selected"
-            );
+            paymentStrategy = new CodPaymentStrategy();
         }
 
-        if (paymentResult == null) {
+        if (paymentStrategy == null) {
             throw new RuntimeException(
                     "Unsupported payment type: " + paymentType);
         }
 
+        PaymentResult paymentResult = paymentStrategy.pay(order.getFinalAmount());
         order.setPaymentResult(paymentResult);
 
         // Confirm inventory reservation
